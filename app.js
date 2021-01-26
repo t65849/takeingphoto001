@@ -19,11 +19,11 @@ var options = {
     pingInterval: 3000
 };
 var listener = server.listen(process.env.port || process.env.PORT || 3870, function () {
-    //logger.info('Server listening to ' + listener.address().port);
+    logger.info('Server listening to ' + listener.address().port);
 });
 
 process.on('uncaughtException', function (err) {
-    //logger.error('uncaughtException occurred: ' + (err.stack ? err.stack : err));
+    logger.error('uncaughtException occurred: ' + (err.stack ? err.stack : err));
 });
 
 // Setup Express Server
