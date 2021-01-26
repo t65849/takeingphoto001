@@ -1,4 +1,13 @@
-﻿var quickSearchData = [];
+﻿// Application Log
+var log4js = require('log4js');
+var log4js_extend = require('log4js-extend');
+log4js_extend(log4js, {
+    path: __dirname,
+    format: '(@file:@line:@column)'
+});
+log4js.configure(__dirname + '/log4js.json');
+var logger = log4js.getLogger('bot');
+var quickSearchData = [];
 
 var express = require('express');
 var app = express();
