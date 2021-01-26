@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.min.css">
+    <style>
+        .card {
+            border: none;
+        }
+
+        .photo_size {
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
+    <script type="text/javascript">
+        /**/
+    </script>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">擷取相片</h5>
+                <div id="UserMedia">
+                    <video autoplay class="photo_size"></video>
+                </div>
+                <div id="TakePhoto" style="display:none">
+                    <canvas id='takePhotoCanvas' class="photo_size"></canvas>
+                </div>
+                <button id="takePhotoButton" class="btn btn-success">擷取相片</button>
+                <button id="sendPhotoButton" class="btn btn-success" style="display:none">確定</button>
+                <button id="retakePhotoButton" class="btn btn-danger" style="display:none">重新擷取</button>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+    $(document).ready(function () {
+        navigator.mediaDevices.getUserMedia({ video: true }) //取得相機權限
+            .then(mediaStream => {
+                document.querySelector('video').srcObject = mediaStream;
+
+                const track = mediaStream.getVideoTracks()[0];
+                imageCapture = new ImageCapture(track);
+            })
+            .catch(error => console.log(error));
+    })
+
+    $(document).ready(function () {
+        $("#takePhotoButton").click(function () { //擷取相機
+            var c = navigator.mediaDevices.getUserMedia();
+            console.log(c);
+            if (c == false) {
+                alert("Test");
+            } else {
+                $("#sendPhotoButton").toggle();
+                $("#retakePhotoButton").toggle();
+                $("#TakePhoto").toggle();
+                $("#takePhotoButton").toggle();
+                $("#UserMedia").toggle();
+                imageCapture.takePhoto()
+                    .then(blob => createImageBitmap(blob))
+                    .then(imageBitmap => {
+                        const canvas = document.querySelector('#takePhotoCanvas');
+                        drawCanvas(canvas, imageBitmap);
+                    })
+                    .catch(error => console.log(error));
+            }
+        })
+    })
+
+    $(document).ready(function () {
+        $("#sendPhotoButton").click(function () { //送出相機
+            //
+        })
+    })
+
+    $(document).ready(function () {
+        $("#retakePhotoButton").click(function () { //重新擷取
+            $("#sendPhotoButton").toggle();
+            $("#retakePhotoButton").toggle();
+            $("#TakePhoto").toggle();
+            $("#takePhotoButton").toggle();
+            $("#UserMedia").toggle();
+            //drawCanvas("0", "0");
+        })
+    })
+
+    function drawCanvas(canvas, img) {
+        canvas.width = getComputedStyle(canvas).width.split('px')[0];
+        canvas.height = getComputedStyle(canvas).height.split('px')[0];
+        let ratio = Math.min(canvas.width / img.width, canvas.height / img.height);
+        let x = (canvas.width - img.width * ratio) / 2;
+        let y = (canvas.height - img.height * ratio) / 2;
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height,
+            x, y, img.width * ratio, img.height * ratio);
+    }
+
+</script>
+
+</html>
