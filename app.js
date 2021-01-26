@@ -7,24 +7,11 @@ log4js_extend(log4js, {
 });
 log4js.configure(__dirname + '/log4js.json');
 var logger = log4js.getLogger('bot');
-var quickSearchData = [];
 
-var express = require('express');
+var express = require('express'); //外面模組要進來
 var app = express();
 var bodyParser = require('body-parser');
-var http = require('http');
-var server = http.Server(app); // create express server
-var options = {
-    pingTimeout: 60000,
-    pingInterval: 3000
-};
-var listener = server.listen(process.env.port || process.env.PORT || 3870, function () {
-    logger.info('Server listening to ' + listener.address().port);
-});
-
-process.on('uncaughtException', function (err) {
-    logger.error('uncaughtException occurred: ' + (err.stack ? err.stack : err));
-});
+var hashtable = require(__dirname + '/hashtable.js');
 
 // Setup Express Server
 app.use(bodyParser.urlencoded({
@@ -38,32 +25,361 @@ app.all('*', function (req, res, next) {
     next();
 });
 
-// 讀取組態表
-var fs = require('fs');
+var config = require('fs').readFileSync(__dirname + '/config.json');
+config = JSON.parse(config);
 
 app.get('/api', function (request, response) {
     response.send('API is running');
-    console.log('API is running');
 });
 
-app.use(express.static('public'));
-app.use('/images', express.static(__dirname + '/images'));
-app.use('/pages', express.static(__dirname + '/pages'));
-//app.use(express.static('pages')); //導入pages資料夾裡的東西
-app.get('/capture', function (request, response) {
-    console.log('GET /login');
-    request.header("Content-Type", 'text/html');
-    var nonce = "";
-    nonce = new Date().getTime();
-    //nonce = 'testnonce';
-    var fs = require('fs');
-    fs.readFile(__dirname + '/pages/capture.html', 'utf8', function (err, data) {
-        if (err) {
-            this.res.send(err);
-        }
-        this.res.send(data);
-    }.bind({
-        req: request,
-        res: response
-    }));
+app.get('/logs', function (request, response) {
+    var stream = require('fs').createReadStream('logs/messaging.log');
+    stream.pipe(response);
 });
+
+app.post('/messages', function (request, response) {
+    response.send('');
+    console.log(request.body);
+    var results = request.body.events;
+    console.log(JSON.stringify(results));
+    console.log('receive message count: ' + results.length);
+    for (var idx = 0; idx < results.length; idx++) {
+        var acct = results[idx].source.userId;
+        var reply_token = results[idx].replyToken;
+        console.log('reply token: ' + results[idx].replyToken);
+        console.log('createdTime: ' + results[idx].timestamp);
+        console.log('from: ' + results[idx].source.userId);
+        console.log('type: ' + results[idx].type);
+        if (results[idx].type == 'message') {
+            if (results[idx].message.type == 'text') {
+                SendMessage(acct, results[idx].message.text, 'tstiisacompanyfortatung', reply_token, function (ret) {
+                });
+            }else if(results[idx].message.type == 'sticker'){
+                //SendMessage(acct, '貼圖', 'tstiisacompanyfortatung', reply_token, function (ret) {
+                //});
+                SendSticker(acct, results[idx].message.packageId, results[idx].message.stickerId, 'tstiisacompanyfortatung', reply_token, function (ret) {
+                });
+            }else if(results[idx].message.type == 'imagemap'){
+                SendMessage(acct, 'IMAGEMAP', 'tstiisacompanyfortatung', reply_token, function (ret) {
+                });
+            }
+        }
+    }
+});
+
+var http = require('http');
+var server = http.Server(app);	// create express server
+var options = {
+    pingTimeout: 60000,
+    pingInterval: 3000
+};
+var listener = server.listen(process.env.port || process.env.PORT || 3978, function () {
+   logger.info('Server listening to ' + listener.address().port); 
+});
+
+process.on('uncaughtException', function (err) {
+    logger.error('uncaughtException occurred: ' + (err.stack ? err.stack : err));
+});
+
+// 傳送貼圖給 LINE 使用者
+function SendSticker(userId, package, sticker, password, reply_token, callback) {
+    if (password == 'tstiisacompanyfortatung') {
+        var data = {
+            'to': userId,
+            'messages': [
+                { 'type': 'sticker', 'packageId': package, 'stickerId': sticker }
+            ]
+        };
+        
+        logger.info('傳送訊息給 ' + userId);
+        /*ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
+            if (!ret) {
+                PostToLINE(data, config.channel_access_token, this.callback);
+            } 
+        });*/
+        ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
+            if (ret) {
+                this.callback(true);
+            } else {
+                PostToLINE(data, config.channel_access_token, this.callback);
+            }
+        }.bind({ callback: callback }));
+    } else {
+        callback(false);
+    }
+}
+
+// 傳送訊息給 LINE 使用者
+function SendMessage(userId, message, password, reply_token, callback) {
+    if (password == 'tstiisacompanyfortatung') {
+        var data = {
+            'to': userId,
+            'messages': [
+                { 'type': 'text', 'text': message }
+            ]
+        };
+        logger.info('傳送訊息給 ' + userId);
+        /*ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
+            if (!ret) {
+                PostToLINE(data, config.channel_access_token, this.callback);
+            } 
+        });*/
+        ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
+            if (ret) {
+                this.callback(true);
+            } else {
+                PostToLINE(data, config.channel_access_token, this.callback);
+            }
+        }.bind({ callback: callback }));
+    } else {
+        callback(false);
+    }
+}
+
+// 傳送[可點選圖片]給 LINE 使用者
+function SendImagemap(userId, baseUrl, altText, imagemap, password, reply_token, callback) {
+    if (password == 'tstiisacompanyfortatung') {
+        var data = {
+            'to': userId,
+            'messages': [{
+                "type": "imagemap",
+                "baseUrl": baseUrl,
+                "altText": altText,
+                "baseSize": {
+                    "height": 693,
+                    "width": 1040
+                },
+                "actions": imagemap
+            }]
+        };
+        logger.info('傳送訊息給 ' + userId);
+        logger.info('傳送圖片網址: ' + baseUrl);
+        /*ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
+            if (!ret) {
+                PostToLINE(data, config.channel_access_token, this.callback);
+            } 
+        });*/
+        ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
+            if (ret) {
+                this.callback(true);
+            } else {
+                PostToLINE(data, config.channel_access_token, this.callback);
+            }
+        }.bind({ callback: callback }));
+    } else {
+        callback(false);
+    }
+}
+// 傳送【選單】給 LINE 使用者
+function SendButtons(userId, image_url, title, text, buttons, alt_text, password, reply_token, callback) {
+    if (password == 'tstiisacompanyfortatung') {
+        var data = {
+            'to': userId,
+            'messages': [{
+                'type': 'template',
+                'altText': alt_text,
+                'template': {
+                    'type': 'buttons',
+                    'thumbnailImageUrl': image_url,
+                    'title': title,
+                    'text': text,
+                    'actions': buttons
+                }
+            }]
+        };
+        logger.info('傳送訊息給 ' + userId);
+        ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
+            if (ret) {
+                this.callback(true);
+            } else {
+                PostToLINE(data, config.channel_access_token, this.callback);
+            }
+        }.bind({ callback: callback }));
+    } else {
+        callback(false);
+    }
+}
+
+// 傳送【確認】給 LINE 使用者
+function SendConfirm(userId, text, buttons, alt_text, password, reply_token, callback) {
+    if (password == 'tstiisacompanyfortatung') {
+        var data = {
+            'to': userId,
+            'messages': [{
+                'type': 'template',
+                'altText': alt_text,
+                'template': {
+                    'type': 'confirm',
+                    'text': text,
+                    'actions': buttons
+                }
+            }]
+        };
+        logger.info('傳送訊息給 ' + userId);
+        ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
+            if (ret) {
+                this.callback(true);
+            } else {
+                PostToLINE(data, config.channel_access_token, this.callback);
+            }
+        }.bind({ callback: callback }));
+    } else {
+        callback(false);
+    }
+}
+
+// 傳送【可滾動選單】給 LINE 使用者
+function SendCarousel(userId, columns, password, reply_token, callback) {
+    if (password == 'tstiisacompanyfortatung') {
+        var data = {
+            'to': userId,
+            'messages': [{
+                'type': 'template',
+                'altText': '請至行動裝置檢視訊息',
+                'template': {
+                    'type': 'carousel',
+                    'columns': columns
+                }
+            }]
+        };
+        logger.info('傳送訊息給 ' + userId);
+        ReplyMessage(data, config.channel_access_token, reply_token, function (ret) {
+            if (ret) {
+                this.callback(true);
+            } else {
+                PostToLINE(data, config.channel_access_token, this.callback);
+            }
+        }.bind({ callback: callback }));
+    } else {
+        callback(false);
+    }
+}
+
+// 直接回覆訊息給 LINE 使用者
+function ReplyMessage(data, channel_access_token, reply_token, callback) {
+    data.replyToken = reply_token;
+    logger.info(JSON.stringify(data));
+    var options = {
+        host: 'api.line.me',
+        port: '443',
+        path: '/v2/bot/message/reply',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Content-Length': Buffer.byteLength(JSON.stringify(data)),
+            'Authorization': 'Bearer <' + channel_access_token + '>'
+        }
+    };
+    var https = require('https');
+    var req = https.request(options, function (res) {
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            logger.info('Response: ' + chunk);
+        });
+        res.on('end', function () {
+        });
+        logger.info('Reply message status code: ' + res.statusCode);
+        if (res.statusCode == 200) {
+            logger.info('Reply message success');
+            this.callback(true);
+        } else {
+            logger.info('Reply message failure');
+            this.callback(false);
+        }
+    }.bind({ callback: callback }));
+    req.write(JSON.stringify(data));
+    req.end();
+}
+
+// 取得 LINE 使用者資訊
+function GetProfile(userId, callback) {
+    var https = require('https');
+    var options = {
+        host: 'api.line.me',
+        port: '443',
+        path: '/v2/bot/profile/' + userId,
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer <' + config.channel_access_token + '>'
+        }
+    };
+
+    var req = https.request(options, function (res) {
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            logger.info('Response: ' + chunk);
+            if (res.statusCode == 200) {
+                var result = JSON.parse(chunk);
+                logger.info('displayName: ' + result.displayName);
+                logger.info('userId: ' + result.userId);
+                logger.info('pictureUrl: ' + result.pictureUrl);
+                logger.info('statusMessage: ' + result.statusMessage);
+                callback(result);
+            } if (res.statusCode == 401) {
+                logger.info('IssueAccessToken');
+                IssueAccessToken();
+            }
+        });
+    }).end();
+}
+
+function PostToLINE(data, channel_access_token, callback) {
+    logger.info(JSON.stringify(data));
+    var options = {
+        host: 'api.line.me',
+        port: '443',
+        path: '/v2/bot/message/push',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Content-Length': Buffer.byteLength(JSON.stringify(data)),
+            'Authorization': 'Bearer <' + channel_access_token + '>'
+        }
+    };
+    var https = require('https');
+    var req = https.request(options, function (res) {
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            logger.info('Response: ' + chunk);
+        });
+    });
+    req.write(JSON.stringify(data));
+    req.end();
+    try {
+        callback(true);
+    } catch (e) { };
+}
+function IssueAccessToken() {
+    var https = require('https');
+    var options = {
+        host: 'api.line.me',
+        port: '443',
+        path: '/v2/oauth/accessToken',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    };
+
+    options.form = {};
+    options.form.grant_type = 'client_credentials';
+    options.form.client_id = config.channel_id;
+    options.form.client_secret = config.channel_secret;
+
+    var req = https.request(options, function (res) {
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            logger.info('Response: ' + chunk);
+            if (res.statusCode == 200) {
+                var result = JSON.parse(chunk);
+                config.channel_access_token = result.access_token;
+                var fs = require('fs');
+                fs.writeFile(__dirname + '/config.json', JSON.stringify(config), function (err) {
+                    if (err) {
+                        logger.error(e);
+                    }
+                });
+            }
+        });
+    }).end();
+}
