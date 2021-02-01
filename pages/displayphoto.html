@@ -74,8 +74,10 @@
       // select filter
       const sel = createSelect();
       sel.id("chooseImg");
-      const selectList = ['Spiderman Mask', 'Dog Filter']; // list of filters
-      sel.option('Select Filter', -1); // Default no filter
+      //const selectList = ['Spiderman Mask', 'Dog Filter']; // list of filters
+      const selectList = ['蜘蛛人特效', '小狗特效']; // list of filters
+      //sel.option('Select Filter', -1); // Default no filter
+      sel.option('點我選擇特效', -1); // Default no filter
       for (let i = 0; i < selectList.length; i++) {
         sel.option(selectList[i], i);
       }
@@ -90,7 +92,7 @@
       button = createButton('擷取相片');
       button.id("takePhotoButton");
       button.class("btn btn-success");
-      send_button = createButton('確定');
+      send_button = createButton('儲存');
       send_button.id("sendPhotoButton");
       send_button.class("btn btn-success");
       send_button.hide();
@@ -104,7 +106,7 @@
           dataUrl = canvas.toDataURL(),
           imageFoo = document.getElementById('resultImg');
         imageFoo.src = dataUrl;
-
+        console.log(dataUrl);
         // Style your image here
         imageFoo.style.width = canvas.width;
         imageFoo.style.height = canvas.height;
@@ -124,8 +126,21 @@
         $(this).toggle();
         $("#sendPhotoButton").toggle();
       })
-      $("#retakePhotoButton").click(function () { //送出相片
-        //
+      $("#sendPhotoButton").click(function () { //儲存相片
+        var today = new Date();
+        var year = today.getFullYear().toString();
+        var month = today.getMonth() + 1; if (month < 10) { month = "0" + month; }
+        var date = today.getDate(); if (date < 10) { date = "0" + date; }
+        var H = today.getHours(); if (H < 10) { H = "0" + H; }
+        var m = today.getMinutes(); if (m < 10) { m = "0" + m; }
+        var s = today.getSeconds(); if (s < 10) { s = "0" + s; }
+        var full_date = year + month.toString() + date.toString() + H.toString() + m.toString() + s.toString();
+        var get_url = $("#resultImg").attr('src');
+        var link = document.createElement('a');
+        link.href = get_url;
+        link.download = 'IMG_' + full_date + '.png';
+        document.body.appendChild(link);
+        link.click();
       })
     }
 
@@ -139,14 +154,20 @@
      * In p5.js, draw() function is executed after setup(). This function runs inside a loop until the program is stopped.
     */
     function draw() {
-      image(videoInput, 0, 0, outputWidth, outputHeight); // render video from webcam
-
-
-      // apply filter based on choice
-      switch (selected) {
-        case '-1': break;
-        case '0': drawSpidermanMask(); break;
-        case '1': drawDogFace(); break;
+      try {
+        image(videoInput, 0, 0, outputWidth, outputHeight); // render video from webcam
+      } catch (err) {
+        console.log(err);
+      }
+      try {
+        // apply filter based on choice
+        switch (selected) {
+          case '-1': break;
+          case '0': drawSpidermanMask(); break;
+          case '1': drawDogFace(); break;
+        }
+      } catch (err) {
+        console.log(err);
       }
     }
 
