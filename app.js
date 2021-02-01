@@ -85,3 +85,20 @@ app.get('/displayphoto', function (request, response) {
         res: response
     }));
 });
+app.get('/displayphoto_phonetest', function (request, response) {
+    console.log('GET /capture');
+    request.header("Content-Type", 'text/html');
+    var nonce = "";
+    nonce = new Date().getTime();
+    //nonce = 'testnonce';
+    var fs = require('fs');
+    fs.readFile(__dirname + '/pages/displayphoto_phonetest.html', 'utf8', function (err, data) {
+        if (err) {
+            this.res.send(err);
+        }
+        this.res.send(data);
+    }.bind({
+        req: request,
+        res: response
+    }));
+});
