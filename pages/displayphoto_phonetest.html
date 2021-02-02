@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Face Filter</title>
+  <title>臉部特效測試</title>
   <style>
     /*canvas {
       width: 100%;
@@ -56,6 +56,7 @@
     let retake_button;
     let newCanvas;
     var big_font = "50px";
+    var ultra_font = "70px";
     /**
      * In p5.js, `setup()` function is executed at the beginning of our program, but after the `preload()` function.
     */
@@ -121,7 +122,7 @@
       send_button.id("sendPhotoButton");
       send_button.class("btn btn-success btn-lg");
       send_button.position(0, outputHeight * 0.85);
-      send_button.style("font-size", big_font);
+      send_button.style("font-size", ultra_font);
       send_button.hide();
       retake_button = createButton('重新擷取');
       retake_button.id("retakePhotoButton");
