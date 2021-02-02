@@ -18,7 +18,7 @@
 
 <body>
   <div id="TakePhoto" style="display:none">
-    <img id="resultImg" src="img_girl.jpg">
+    <img id="resultImg" src="">
   </div>
   <script src="https://cdn.jsdelivr.net/npm/p5@1.0.0/lib/p5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/clmtrackr@1.1.2/build/clmtrackr.min.js"></script>
@@ -49,18 +49,24 @@
       imgDogNose = loadImage("https://i.ibb.co/PWYGkw1/dog-nose.png");
     }
 
+    let spider;
+    let puppy;
     let button;
     let send_button;
     let retake_button;
     let newCanvas;
+    var big_font = "50px";
     /**
      * In p5.js, `setup()` function is executed at the beginning of our program, but after the `preload()` function.
     */
     function setup() {
       const maxWidth = Math.min(windowWidth, windowHeight);
+      const maxLength = Math.max(windowHeight, windowWidth);
       pixelDensity(1);
-      outputWidth = maxWidth;
-      outputHeight = maxWidth * 0.75; // 4:3
+      //outputWidth = maxWidth;
+      //outputHeight = maxWidth * 0.75; // 4:3
+      outputWidth = windowWidth;
+      outputHeight = windowHeight;
 
       newCanvas = createCanvas(outputWidth, outputHeight);
       newCanvas.id("displayCanvas");
@@ -72,7 +78,7 @@
       createDiv(''); //換行
 
       // select filter
-      const sel = createSelect();
+      /*const sel = createSelect();
       sel.id("chooseImg");
       //const selectList = ['Spiderman Mask', 'Dog Filter']; // list of filters
       const selectList = ['蜘蛛人特效', '小狗特效']; // list of filters
@@ -81,7 +87,7 @@
       for (let i = 0; i < selectList.length; i++) {
         sel.option(selectList[i], i);
       }
-      sel.changed(applyFilter);
+      sel.changed(applyFilter);*/
 
       // tracker
       faceTracker = new clm.tracker();
@@ -89,42 +95,59 @@
       faceTracker.start(videoInput.elt);
 
       //
+      spider = createButton('蜘蛛人特效', '0');
+      spider.id("spiderPhotoButton");
+      spider.class("btn btn-danger btn-lg");
+      spider.position(0, outputHeight * 0.55);
+      spider.style("background-color", "#ff1500");
+      spider.style("font-size", big_font);
+      spider.mouseClicked(function () {
+        selected = spider.value();
+      });
+      puppy = createButton('小狗特效', '1');
+      puppy.id("spiderPhotoButton");
+      puppy.class("btn btn-warning btn-lg");
+      puppy.position(0, outputHeight * 0.7);
+      puppy.style("font-size", big_font);
+      puppy.mouseClicked(function () {
+        selected = puppy.value();
+      });
       button = createButton('擷取相片');
       button.id("takePhotoButton");
       button.class("btn btn-success btn-lg");
+      button.position(0, outputHeight * 0.85);
+      button.style("font-size", big_font);
       send_button = createButton('儲存');
       send_button.id("sendPhotoButton");
       send_button.class("btn btn-success btn-lg");
+      send_button.position(0, outputHeight * 0.85);
+      send_button.style("font-size", big_font);
       send_button.hide();
       retake_button = createButton('重新擷取');
       retake_button.id("retakePhotoButton");
       retake_button.class("btn btn-danger btn-lg");
+      retake_button.position(0, outputHeight * 0.7);
+      retake_button.style("font-size", big_font);
       retake_button.hide();
+
       $("#takePhotoButton").click(function () { //擷取相機
         //
         var canvas = document.getElementById('displayCanvas'),
           dataUrl = canvas.toDataURL(),
           imageFoo = document.getElementById('resultImg');
         imageFoo.src = dataUrl;
-        console.log(dataUrl);
         // Style your image here
         imageFoo.style.width = canvas.width;
         imageFoo.style.height = canvas.height;
 
-        $("#TakePhoto").toggle();
-        $("#displayCanvas").toggle();
-        $("#chooseImg").toggle();
-        $(this).toggle();
-        $("#sendPhotoButton").toggle();
-        $("#retakePhotoButton").toggle();
+        $(".btn").toggle();
+        $("#TakePhoto").toggle(); //顯示相片結果
+        $("#displayCanvas").toggle(); //隱藏視訊
       })
       $("#retakePhotoButton").click(function () { //重新擷取
-        $("#TakePhoto").toggle();
-        $("#displayCanvas").toggle();
-        $("#chooseImg").toggle();
-        $("#takePhotoButton").toggle();
-        $(this).toggle();
-        $("#sendPhotoButton").toggle();
+        $(".btn").toggle();
+        $("#TakePhoto").toggle(); //隱藏相片結果
+        $("#displayCanvas").toggle(); //顯示視訊結果
       })
       $("#sendPhotoButton").click(function () { //儲存相片
         var today = new Date();
@@ -148,6 +171,25 @@
     // callback function
     function applyFilter() {
       selected = this.selected(); // change filter type
+    }
+    // callback function
+    function spiderButton() {
+      var c = $("#spiderPhotoButton").val();
+      //selected = spider.value();
+      alert(c);
+    }
+    function mouseClicked() {
+      /*$("#spiderPhotoButton").click(function () {
+        selected = spider.value();
+      })*/
+      //selected = spider.value();
+      //console.log(this.value);
+      //alert(selected);
+    }
+    function mouseClicked() {
+      //selected = puppy.value();
+      //console.log(this.value);
+      //alert(selected);
     }
 
     /*
@@ -214,8 +256,10 @@
     function windowResized() {
       const maxWidth = Math.min(windowWidth, windowHeight);
       pixelDensity(1);
-      outputWidth = maxWidth;
-      outputHeight = maxWidth * 0.75; // 4:3
+      //outputWidth = maxWidth;
+      //outputHeight = maxWidth * 0.75; // 4:3
+      outputWidth = windowWidth;
+      outputHeight = windowHeight;
       resizeCanvas(outputWidth, outputHeight);
     }
   </script>

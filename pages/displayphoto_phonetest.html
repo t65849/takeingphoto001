@@ -120,16 +120,16 @@
       send_button = createButton('儲存');
       send_button.id("sendPhotoButton");
       send_button.class("btn btn-success btn-lg");
-      send_button.position(0, outputHeight * 0.9);
-      send_button.style("font-size", "40px");
+      send_button.position(0, outputHeight * 0.85);
+      send_button.style("font-size", big_font);
       send_button.hide();
       retake_button = createButton('重新擷取');
       retake_button.id("retakePhotoButton");
       retake_button.class("btn btn-danger btn-lg");
-      retake_button.position(0, outputHeight * 0.8);
+      retake_button.position(0, outputHeight * 0.7);
       retake_button.style("font-size", big_font);
       retake_button.hide();
-      
+
       $("#takePhotoButton").click(function () { //擷取相機
         //
         var canvas = document.getElementById('displayCanvas'),
