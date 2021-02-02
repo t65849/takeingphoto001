@@ -18,7 +18,7 @@
 
 <body>
   <div id="TakePhoto" style="display:none">
-    <img id="resultImg" src="img_girl.jpg">
+    <img id="resultImg" src="">
   </div>
   <script src="https://cdn.jsdelivr.net/npm/p5@1.0.0/lib/p5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/clmtrackr@1.1.2/build/clmtrackr.min.js"></script>
@@ -94,33 +94,39 @@
       faceTracker.start(videoInput.elt);
 
       //
-      spider = createButton('蜘蛛人<br/>特效', '0');
+      spider = createButton('蜘蛛人特效', '0');
       spider.id("spiderPhotoButton");
-      spider.class("btn btn-success btn-lg");
-      spider.position(0, outputHeight * 0.5);
+      spider.class("btn btn-danger btn-lg");
+      spider.position(0, outputHeight * 0.55);
+      spider.style("background-color", "#ff1500");
+      spider.style("font-size", "40px");
       spider.mouseClicked(function () {
         selected = spider.value();
       });
-      puppy = createButton('小狗<br/>特效', '1');
+      puppy = createButton('小狗特效', '1');
       puppy.id("spiderPhotoButton");
-      puppy.class("btn btn-success btn-lg");
+      puppy.class("btn btn-warning btn-lg");
       puppy.position(0, outputHeight * 0.7);
+      puppy.style("font-size", "40px");
       puppy.mouseClicked(function () {
         selected = puppy.value();
       });
       button = createButton('擷取相片');
       button.id("takePhotoButton");
       button.class("btn btn-success btn-lg");
-      button.position(0, outputHeight * 0.9);
+      button.position(0, outputHeight * 0.85);
+      button.style("font-size", "40px");
       send_button = createButton('儲存');
       send_button.id("sendPhotoButton");
       send_button.class("btn btn-success btn-lg");
       send_button.position(0, outputHeight * 0.9);
+      send_button.style("font-size", "40px");
       send_button.hide();
       retake_button = createButton('重新擷取');
       retake_button.id("retakePhotoButton");
       retake_button.class("btn btn-danger btn-lg");
       retake_button.position(0, outputHeight * 0.8);
+      retake_button.style("font-size", "40px");
       retake_button.hide();
       /*$("#spiderPhotoButton").click(function () {
         selected = 0;
