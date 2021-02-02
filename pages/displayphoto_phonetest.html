@@ -55,6 +55,7 @@
     let send_button;
     let retake_button;
     let newCanvas;
+    var big_font = "50px";
     /**
      * In p5.js, `setup()` function is executed at the beginning of our program, but after the `preload()` function.
     */
@@ -99,7 +100,7 @@
       spider.class("btn btn-danger btn-lg");
       spider.position(0, outputHeight * 0.55);
       spider.style("background-color", "#ff1500");
-      spider.style("font-size", "40px");
+      spider.style("font-size", big_font);
       spider.mouseClicked(function () {
         selected = spider.value();
       });
@@ -107,7 +108,7 @@
       puppy.id("spiderPhotoButton");
       puppy.class("btn btn-warning btn-lg");
       puppy.position(0, outputHeight * 0.7);
-      puppy.style("font-size", "40px");
+      puppy.style("font-size", big_font);
       puppy.mouseClicked(function () {
         selected = puppy.value();
       });
@@ -115,7 +116,7 @@
       button.id("takePhotoButton");
       button.class("btn btn-success btn-lg");
       button.position(0, outputHeight * 0.85);
-      button.style("font-size", "40px");
+      button.style("font-size", big_font);
       send_button = createButton('儲存');
       send_button.id("sendPhotoButton");
       send_button.class("btn btn-success btn-lg");
@@ -126,11 +127,9 @@
       retake_button.id("retakePhotoButton");
       retake_button.class("btn btn-danger btn-lg");
       retake_button.position(0, outputHeight * 0.8);
-      retake_button.style("font-size", "40px");
+      retake_button.style("font-size", big_font);
       retake_button.hide();
-      /*$("#spiderPhotoButton").click(function () {
-        selected = 0;
-      })*/
+      
       $("#takePhotoButton").click(function () { //擷取相機
         //
         var canvas = document.getElementById('displayCanvas'),
