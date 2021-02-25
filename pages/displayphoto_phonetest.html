@@ -22,8 +22,9 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/p5@1.0.0/lib/p5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/clmtrackr@1.1.2/build/clmtrackr.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
   <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-url-parser/2.3.1/purl.min.js"></script>
   <script type="text/javascript">
     let outputWidth;
     let outputHeight;
@@ -121,6 +122,7 @@
         if (videoInput.loadedmetadata == true) { //如果一開始有開啟相機權限
           selected = spider.value();
           testconsole();
+          console.log("124");
         } else { //未開
           alert("請重新開啟相機權限再繼續");
         }
@@ -206,7 +208,7 @@
     }
 
     function testconsole() {
-      console.log("123");
+      console.log("209");
       var display = $.url.param('DISPLAY');
       console.log(display);
     }
