@@ -24,6 +24,7 @@
   <script src="https://cdn.jsdelivr.net/npm/clmtrackr@1.1.2/build/clmtrackr.min.js"></script>
   <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
   <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-url-parser/2.3.1/purl.min.js"></script>
   <script type="text/javascript">
     let outputWidth;
     let outputHeight;
@@ -47,16 +48,32 @@
       imgDogEarRight = loadImage("https://i.ibb.co/bFJf33z/dog-ear-right.png");
       imgDogEarLeft = loadImage("https://i.ibb.co/dggwZ1q/dog-ear-left.png");
       imgDogNose = loadImage("https://i.ibb.co/PWYGkw1/dog-nose.png");
+      /*if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition, errorMessage);
+      } else {
+        alert("對不起，您的瀏覽器不支援!");
+      }*/
+    }
+
+    function showPosition(position) {
+      /*alert("緯度: " + position.coords.latitude +
+        "   經度: " + position.coords.longitude);*/
+    }
+    function errorMessage(position) { //沒有取得位置權限
+      alert("對不起，請重新開啟位置權限，謝謝您!");
     }
 
     let spider;
     let puppy;
     let button;
+    let vfx;
     let send_button;
     let retake_button;
+    let ins_button;
     let newCanvas;
     var big_font = "50px";
-    var ultra_font = "70px";
+    var ultra_font = "55px";
+    var check_save = false;
     /**
      * In p5.js, `setup()` function is executed at the beginning of our program, but after the `preload()` function.
     */
@@ -96,14 +113,34 @@
       faceTracker.start(videoInput.elt);
 
       //
-      spider = createButton('蜘蛛人特效', '0');
+      vfx = createButton('開啟特效');
+      vfx.id("vfxPhotoButton");
+      vfx.class("btn btn-primary btn-lg");
+      vfx.position(0, outputHeight * 0.7);
+      //vfx.style("background-color", "#ff1500");
+      vfx.style("font-size", big_font);
+      vfx.mouseClicked(function () {
+        if (videoInput.loadedmetadata == true) { //如果一開始有開啟相機權限
+          //selected = spider.value();
+          var display = $.url().param('DISPLAY');
+          selected = display;
+        } else { //未開
+          alert("請重新開啟相機權限再繼續");
+        }
+      });
+      /*spider = createButton('蜘蛛人特效', '0');
       spider.id("spiderPhotoButton");
       spider.class("btn btn-danger btn-lg");
       spider.position(0, outputHeight * 0.55);
       spider.style("background-color", "#ff1500");
       spider.style("font-size", big_font);
       spider.mouseClicked(function () {
-        selected = spider.value();
+        if (videoInput.loadedmetadata == true) { //如果一開始有開啟相機權限
+          selected = spider.value();
+          var display = $.url().param('DISPLAY');
+        } else { //未開
+          alert("請重新開啟相機權限再繼續");
+        }
       });
       puppy = createButton('小狗特效', '1');
       puppy.id("spiderPhotoButton");
@@ -112,24 +149,32 @@
       puppy.style("font-size", big_font);
       puppy.mouseClicked(function () {
         selected = puppy.value();
-      });
+      });*/
       button = createButton('擷取相片');
       button.id("takePhotoButton");
       button.class("btn btn-success btn-lg");
       button.position(0, outputHeight * 0.85);
       button.style("font-size", big_font);
-      send_button = createButton('儲存');
-      send_button.id("sendPhotoButton");
-      send_button.class("btn btn-success btn-lg");
-      send_button.position(0, outputHeight * 0.85);
-      send_button.style("font-size", ultra_font);
-      send_button.hide();
+
       retake_button = createButton('重新擷取');
       retake_button.id("retakePhotoButton");
       retake_button.class("btn btn-danger btn-lg");
-      retake_button.position(0, outputHeight * 0.7);
+      retake_button.position(0, outputHeight * 0.55);
       retake_button.style("font-size", big_font);
       retake_button.hide();
+      send_button = createButton('儲存');
+      send_button.id("sendPhotoButton");
+      send_button.class("btn btn-success btn-lg");
+      send_button.position(0, outputHeight * 0.7);
+      send_button.style("font-size", ultra_font);
+      send_button.hide();
+      /*ins_button = createButton('分享IG');
+      ins_button.id("insPhotoButton");
+      ins_button.class("btn btn-success btn-lg");
+      ins_button.position(0, outputHeight * 0.85);
+      ins_button.style("font-size", big_font);
+      ins_button.style("background-color", "#CA2A7D");
+      ins_button.hide();*/
 
       $("#takePhotoButton").click(function () { //擷取相機
         //
@@ -149,6 +194,7 @@
         $(".btn").toggle();
         $("#TakePhoto").toggle(); //隱藏相片結果
         $("#displayCanvas").toggle(); //顯示視訊結果
+        check_save = false;
       })
       $("#sendPhotoButton").click(function () { //儲存相片
         var today = new Date();
@@ -165,6 +211,14 @@
         link.download = 'IMG_' + full_date + '.png';
         document.body.appendChild(link);
         link.click();
+        check_save = true;
+      })
+      $("#insPhotoButton").click(function () {
+        if (check_save == false) {
+          alert("請先儲存相片再分享，謝謝您!");
+        } else {
+          //
+        }
       })
     }
 
@@ -262,6 +316,13 @@
       outputWidth = windowWidth;
       outputHeight = windowHeight;
       resizeCanvas(outputWidth, outputHeight);
+
+      spider.position(0, outputHeight * 0.55);
+      puppy.position(0, outputHeight * 0.7);
+      button.position(0, outputHeight * 0.85);
+      retake_button.position(0, outputHeight * 0.55);
+      send_button.position(0, outputHeight * 0.7);
+      ins_button.position(0, outputHeight * 0.85);
     }
   </script>
 </body>
