@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>臉部特效測試</title>
+  <style>
+    /*canvas {
+      width: 100%;
+      max-width: 400px;
+      height: 100%;
+      max-height: 300px;
+    }*/
+  </style>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.min.css">
+</head>
+
+<body>
+  <div id="TakePhoto" style="display:none">
+    <img id="resultImg" src="">
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.0.0/lib/p5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/clmtrackr@1.1.2/build/clmtrackr.min.js"></script>
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-url-parser/2.3.1/purl.min.js"></script>
+  <script type="text/javascript">
+    let outputWidth;
+    let outputHeight;
+
+    let faceTracker; // Face Tracking
+    let videoInput;
+
+    let imgSpidermanMask; // Spiderman Mask Filter
+    let imgDogEarRight, imgDogEarLeft, imgDogNose; // Dog Face Filter
+
+    let selected = -1; // Default no filter
+
+    /*
+     * **p5.js** library automatically executes the `preload()` function. Basically, it is used to load external files. In our case, we'll use it to load the images for our filters and assign them to separate variables for later use.
+    */
+    function preload() {
+      // Spiderman Mask Filter asset
+      imgSpidermanMask = loadImage("https://i.ibb.co/9HB2sSv/spiderman-mask-1.png");
+
+      // Dog Face Filter assets
+      imgDogEarRight = loadImage("https://i.ibb.co/bFJf33z/dog-ear-right.png");
+      imgDogEarLeft = loadImage("https://i.ibb.co/dggwZ1q/dog-ear-left.png");
+      imgDogNose = loadImage("https://i.ibb.co/PWYGkw1/dog-nose.png");
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition, errorMessage);
+      } else {
+        alert("對不起，您的瀏覽器不支援!");
+      }
+    }
+
+    function showPosition(position) {
+      /*alert("緯度: " + position.coords.latitude +
+        "   經度: " + position.coords.longitude);*/
+    }
+    function errorMessage(position) { //沒有取得位置權限
+      alert("對不起，請重新開啟位置權限，謝謝您!");
+    }
+
+    let spider;
+    let puppy;
+    let button;
+    let send_button;
+    let retake_button;
+    let ins_button;
+    let newCanvas;
+    var big_font = "50px";
+    var ultra_font = "55px";
+    var check_save = false;
+    /**
+     * In p5.js, `setup()` function is executed at the beginning of our program, but after the `preload()` function.
+    */
+    function setup() {
+      const maxWidth = Math.min(windowWidth, windowHeight);
+      const maxLength = Math.max(windowHeight, windowWidth);
+      pixelDensity(1);
+      //outputWidth = maxWidth;
+      //outputHeight = maxWidth * 0.75; // 4:3
+      outputWidth = windowWidth;
+      outputHeight = windowHeight;
+
+      newCanvas = createCanvas(outputWidth, outputHeight);
+      newCanvas.id("displayCanvas");
+      // webcam capture
+      videoInput = createCapture(VIDEO);
+      videoInput.size(outputWidth, outputHeight);
+      videoInput.hide();
+
+      createDiv(''); //換行
+
+      // select filter
+      /*const sel = createSelect();
+      sel.id("chooseImg");
+      //const selectList = ['Spiderman Mask', 'Dog Filter']; // list of filters
+      const selectList = ['蜘蛛人特效', '小狗特效']; // list of filters
+      //sel.option('Select Filter', -1); // Default no filter
+      sel.option('點我選擇特效', -1); // Default no filter
+      for (let i = 0; i < selectList.length; i++) {
+        sel.option(selectList[i], i);
+      }
+      sel.changed(applyFilter);*/
+
+      // tracker
+      faceTracker = new clm.tracker();
+      faceTracker.init();
+      faceTracker.start(videoInput.elt);
+
+      //
+      spider = createButton('蜘蛛人特效', '0');
+      spider.id("spiderPhotoButton");
+      spider.class("btn btn-danger btn-lg");
+      spider.position(0, outputHeight * 0.55);
+      spider.style("background-color", "#ff1500");
+      spider.style("font-size", big_font);
+      spider.mouseClicked(function () {
+        if (videoInput.loadedmetadata == true) { //如果一開始有開啟相機權限
+          selected = spider.value();
+          testconsole();
+          console.log("124");
+        } else { //未開
+          alert("請重新開啟相機權限再繼續");
+        }
+      });
+      puppy = createButton('小狗特效', '1');
+      puppy.id("spiderPhotoButton");
+      puppy.class("btn btn-warning btn-lg");
+      puppy.position(0, outputHeight * 0.7);
+      puppy.style("font-size", big_font);
+      puppy.mouseClicked(function () {
+        selected = puppy.value();
+      });
+      button = createButton('擷取相片');
+      button.id("takePhotoButton");
+      button.class("btn btn-success btn-lg");
+      button.position(0, outputHeight * 0.85);
+      button.style("font-size", big_font);
+
+      retake_button = createButton('重新擷取');
+      retake_button.id("retakePhotoButton");
+      retake_button.class("btn btn-danger btn-lg");
+      retake_button.position(0, outputHeight * 0.55);
+      retake_button.style("font-size", big_font);
+      retake_button.hide();
+      send_button = createButton('儲存');
+      send_button.id("sendPhotoButton");
+      send_button.class("btn btn-success btn-lg");
+      send_button.position(0, outputHeight * 0.7);
+      send_button.style("font-size", ultra_font);
+      send_button.hide();
+      ins_button = createButton('分享IG');
+      ins_button.id("insPhotoButton");
+      ins_button.class("btn btn-success btn-lg");
+      ins_button.position(0, outputHeight * 0.85);
+      ins_button.style("font-size", big_font);
+      ins_button.style("background-color", "#CA2A7D");
+      ins_button.hide();
+
+      $("#takePhotoButton").click(function () { //擷取相機
+        //
+        var canvas = document.getElementById('displayCanvas'),
+          dataUrl = canvas.toDataURL(),
+          imageFoo = document.getElementById('resultImg');
+        imageFoo.src = dataUrl;
+        // Style your image here
+        imageFoo.style.width = canvas.width;
+        imageFoo.style.height = canvas.height;
+
+        $(".btn").toggle();
+        $("#TakePhoto").toggle(); //顯示相片結果
+        $("#displayCanvas").toggle(); //隱藏視訊
+      })
+      $("#retakePhotoButton").click(function () { //重新擷取
+        $(".btn").toggle();
+        $("#TakePhoto").toggle(); //隱藏相片結果
+        $("#displayCanvas").toggle(); //顯示視訊結果
+        check_save = false;
+      })
+      $("#sendPhotoButton").click(function () { //儲存相片
+        var today = new Date();
+        var year = today.getFullYear().toString();
+        var month = today.getMonth() + 1; if (month < 10) { month = "0" + month; }
+        var date = today.getDate(); if (date < 10) { date = "0" + date; }
+        var H = today.getHours(); if (H < 10) { H = "0" + H; }
+        var m = today.getMinutes(); if (m < 10) { m = "0" + m; }
+        var s = today.getSeconds(); if (s < 10) { s = "0" + s; }
+        var full_date = year + month.toString() + date.toString() + H.toString() + m.toString() + s.toString();
+        var get_url = $("#resultImg").attr('src');
+        var link = document.createElement('a');
+        link.href = get_url;
+        link.download = 'IMG_' + full_date + '.png';
+        document.body.appendChild(link);
+        link.click();
+        check_save = true;
+      })
+      $("#insPhotoButton").click(function () {
+        if (check_save == false) {
+          alert("請先儲存相片再分享，謝謝您!");
+        } else {
+          //
+        }
+      })
+    }
+
+    function testconsole() {
+      console.log("209");
+      var display = $.url.param('DISPLAY');
+      console.log(display);
+    }
+
+    //
+    // callback function
+    function applyFilter() {
+      selected = this.selected(); // change filter type
+    }
+    // callback function
+    function spiderButton() {
+      var c = $("#spiderPhotoButton").val();
+      //selected = spider.value();
+      alert(c);
+    }
+    function mouseClicked() {
+      /*$("#spiderPhotoButton").click(function () {
+        selected = spider.value();
+      })*/
+      //selected = spider.value();
+      //console.log(this.value);
+      //alert(selected);
+    }
+    function mouseClicked() {
+      //selected = puppy.value();
+      //console.log(this.value);
+      //alert(selected);
+    }
+
+    /*
+     * In p5.js, draw() function is executed after setup(). This function runs inside a loop until the program is stopped.
+    */
+    function draw() {
+      try {
+        image(videoInput, 0, 0, outputWidth, outputHeight); // render video from webcam
+      } catch (err) {
+        console.log(err);
+      }
+      try {
+        // apply filter based on choice
+        switch (selected) {
+          case '-1': break;
+          case '0': drawSpidermanMask(); break;
+          case '1': drawDogFace(); break;
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    // Spiderman Mask Filter
+    function drawSpidermanMask() {
+      const positions = faceTracker.getCurrentPosition();
+      if (positions !== false) {
+        push();
+        const wx = Math.abs(positions[13][0] - positions[1][0]) * 1.2; // The width is given by the face width, based on the geometry
+        const wy = Math.abs(positions[7][1] - Math.min(positions[16][1], positions[20][1])) * 1.2; // The height is given by the distance from nose to chin, times 2
+        translate(-wx / 2, -wy / 2);
+        image(imgSpidermanMask, positions[62][0], positions[62][1], wx, wy); // Show the mask at the center of the face
+        pop();
+      }
+    }
+
+    // Dog Face Filter
+    function drawDogFace() {
+      const positions = faceTracker.getCurrentPosition();
+      if (positions !== false) {
+        if (positions.length >= 20) {
+          push();
+          translate(-100, -150); // offset adjustment
+          image(imgDogEarRight, positions[20][0], positions[20][1]);
+          pop();
+        }
+
+        if (positions.length >= 16) {
+          push();
+          translate(-20, -150); // offset adjustment
+          image(imgDogEarLeft, positions[16][0], positions[16][1]);
+          pop();
+        }
+
+        if (positions.length >= 62) {
+          push();
+          translate(-57, -20); // offset adjustment
+          image(imgDogNose, positions[62][0], positions[62][1]);
+          pop();
+        }
+      }
+    }
+
+    function windowResized() {
+      const maxWidth = Math.min(windowWidth, windowHeight);
+      pixelDensity(1);
+      //outputWidth = maxWidth;
+      //outputHeight = maxWidth * 0.75; // 4:3
+      outputWidth = windowWidth;
+      outputHeight = windowHeight;
+      resizeCanvas(outputWidth, outputHeight);
+
+      spider.position(0, outputHeight * 0.55);
+      puppy.position(0, outputHeight * 0.7);
+      button.position(0, outputHeight * 0.85);
+      retake_button.position(0, outputHeight * 0.55);
+      send_button.position(0, outputHeight * 0.7);
+      ins_button.position(0, outputHeight * 0.85);
+    }
+  </script>
+</body>
+
+</html>
