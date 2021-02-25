@@ -48,11 +48,11 @@
       imgDogEarRight = loadImage("https://i.ibb.co/bFJf33z/dog-ear-right.png");
       imgDogEarLeft = loadImage("https://i.ibb.co/dggwZ1q/dog-ear-left.png");
       imgDogNose = loadImage("https://i.ibb.co/PWYGkw1/dog-nose.png");
-      if (navigator.geolocation) {
+      /*if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(showPosition, errorMessage);
       } else {
         alert("對不起，您的瀏覽器不支援!");
-      }
+      }*/
     }
 
     function showPosition(position) {
@@ -113,7 +113,7 @@
       faceTracker.start(videoInput.elt);
 
       //
-      spider = createButton('開啟特效');
+      vfx = createButton('開啟特效');
       vfx.id("vfxPhotoButton");
       vfx.class("btn btn-primary btn-lg");
       vfx.position(0, outputHeight * 0.7);
