@@ -112,7 +112,7 @@
       faceTracker.start(videoInput.elt);
 
       //
-      spider = createButton('蜘蛛人特效', '0');
+      /*spider = createButton('蜘蛛人特效', '0');
       spider.id("spiderPhotoButton");
       spider.class("btn btn-danger btn-lg");
       spider.position(0, outputHeight * 0.55);
@@ -121,11 +121,7 @@
       spider.mouseClicked(function () {
         if (videoInput.loadedmetadata == true) { //如果一開始有開啟相機權限
           selected = spider.value();
-          //testconsole();
-          console.log("124");
-          var display = $.url();
-          var t = display.param('DISPLAY');
-          console.log(t);
+          var display = $.url().param('DISPLAY');
         } else { //未開
           alert("請重新開啟相機權限再繼續");
         }
@@ -137,7 +133,14 @@
       puppy.style("font-size", big_font);
       puppy.mouseClicked(function () {
         selected = puppy.value();
-      });
+      });*/
+      if (videoInput.loadedmetadata == true) { //如果一開始有開啟相機權限
+          //selected = spider.value();
+          var display = $.url().param('DISPLAY');
+          selected = display;
+        } else { //未開
+          alert("請重新開啟相機權限再繼續");
+        }
       button = createButton('擷取相片');
       button.id("takePhotoButton");
       button.class("btn btn-success btn-lg");
@@ -208,13 +211,6 @@
           //
         }
       })
-    }
-
-    function testconsole() {
-      console.log("209");
-      var display = $.url();
-      var t = display.param('DISPLAY');
-      console.log(t);
     }
 
     //
