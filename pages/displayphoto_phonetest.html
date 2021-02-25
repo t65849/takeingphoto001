@@ -121,8 +121,11 @@
       spider.mouseClicked(function () {
         if (videoInput.loadedmetadata == true) { //如果一開始有開啟相機權限
           selected = spider.value();
-          testconsole();
+          //testconsole();
           console.log("124");
+          var display = $.url();
+          var t = display.param('DISPLAY');
+          console.log(t);
         } else { //未開
           alert("請重新開啟相機權限再繼續");
         }
