@@ -120,8 +120,7 @@
       spider.mouseClicked(function () {
         if (videoInput.loadedmetadata == true) { //如果一開始有開啟相機權限
           selected = spider.value();
-          var display = $.url.param('DISPLAY');
-          console.log(display);
+          testconsole();
         } else { //未開
           alert("請重新開啟相機權限再繼續");
         }
@@ -204,6 +203,12 @@
           //
         }
       })
+    }
+
+    function testconsole() {
+      console.log("123");
+      var display = $.url.param('DISPLAY');
+      console.log(display);
     }
 
     //
