@@ -221,7 +221,9 @@
         link.href = get_url;
         link.download = 'IMG_' + full_date + '.png';
         document.body.appendChild(link);
-        link.mousedown();
+        link.on('click', function(){
+          testtrigger();
+        })
         //link.click();
         check_save = true;
       })
@@ -234,6 +236,15 @@
       })
     }
 
+    var i = 0;
+    function testtrigger(){
+      if(i<=3){
+        i++;
+        $("#resultImg").trigger('mousedown');
+      } else {
+        $("#resultImg").trigger('mouseup');
+      }
+    }
     //
     // callback function
     function applyFilter() {
