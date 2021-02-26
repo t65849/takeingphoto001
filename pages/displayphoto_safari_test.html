@@ -18,7 +18,7 @@
 
 <body>
   <div id="TakePhoto" style="display:none">
-    <img id="resultImg" src="https://wall.bahamut.com.tw/B/47/2ef869cb2f2f63dc30687aec21d491af_47677.JPG">
+    <img id="resultImg" src="">
   </div>
   <script src="https://cdn.jsdelivr.net/npm/p5@1.0.0/lib/p5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/clmtrackr@1.1.2/build/clmtrackr.min.js"></script>
@@ -191,7 +191,7 @@
         var canvas = document.getElementById('displayCanvas'),
           dataUrl = canvas.toDataURL(),
           imageFoo = document.getElementById('resultImg');
-        //imageFoo.src = dataUrl;
+        imageFoo.src = dataUrl;
         // Style your image here
         imageFoo.style.width = canvas.width;
         imageFoo.style.height = canvas.height;
@@ -220,7 +220,7 @@
         var change_url = get_url.replace("https","googlechrome");
         var link = document.createElement('a');
         link.href = change_url;
-        link.download = 'IMG_' + full_date + '.JPG';
+        link.download = 'IMG_' + full_date + '.PNG';
         document.body.appendChild(link);
         //window.open(get_url);
         link.click();
