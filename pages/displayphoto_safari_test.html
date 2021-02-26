@@ -217,8 +217,9 @@
         var s = today.getSeconds(); if (s < 10) { s = "0" + s; }
         var full_date = year + month.toString() + date.toString() + H.toString() + m.toString() + s.toString();
         var get_url = $("#resultImg").attr('src');
+        var change_url = get_url.replace("https","googlechrome");
         var link = document.createElement('a');
-        link.href = get_url;
+        link.href = change_url;
         link.download = 'IMG_' + full_date + '.JPG';
         document.body.appendChild(link);
         //window.open(get_url);
