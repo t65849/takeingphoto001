@@ -221,9 +221,7 @@
         link.href = get_url;
         link.download = 'IMG_' + full_date + '.png';
         document.body.appendChild(link);
-        link.on('click', function(){
-          testtrigger();
-        })
+        window.open(get_url);
         //link.click();
         check_save = true;
       })
