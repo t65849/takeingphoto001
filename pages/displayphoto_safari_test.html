@@ -221,7 +221,8 @@
         link.href = get_url;
         link.download = 'IMG_' + full_date + '.png';
         document.body.appendChild(link);
-        link.click();
+        link.mousedown();
+        //link.click();
         check_save = true;
       })
       $("#insPhotoButton").click(function () {
